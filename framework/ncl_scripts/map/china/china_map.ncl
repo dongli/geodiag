@@ -131,6 +131,7 @@ begin
 end
 
 procedure setup_china_map(res)
+local i
 begin
 
     res          = True
@@ -189,7 +190,8 @@ begin
 end
 
 procedure attach_china_map(wks, base_plot)
-local res1, res2, res3, f, small_map, map
+local china_shp, province_shp, beijing_county_shp, city_shp, river_shp, \
+    show, color, thickness, res1, res2, res3, f, small_map, map
 begin
 
     ; ------------------------------------------------------------------------
@@ -285,5 +287,42 @@ begin
 
         map = gsn_add_annotation(base_plot, small_map, res4)
     end if
+
+end
+
+function get_china_mask(data, res)
+local chinaMasks, opt, province_shp, f, province_names, data_mask
+begin
+
+    if (.not. isatt(res, "chinaMasks")) then
+        system("echo '[Error]: get_china_mask: Attribute chinaMasks is not provided!")
+        exit
+    end if
+
+    if (isstring(res@chinaMasks))
+        chinaMasks = (/res@chinaMasks/)
+    else
+        chinaMasks = res@chinaMasks
+    end if
+    delete(res@chinaMasks)
+    opt = True
+
+    province_shp = china_map_data_root+"/province.shp"
+    f = addfile(province_shp, "r")
+    province_names = f->NAME
+    opt@shape_var = "NAME"
+    opt@return_mask = True
+    do i = 0, dimsizes(chinaMasks)-1
+        if (any(province_names .eq. chinaMasks(i))) then
+            opt@shape_names = chinaMasks(i)
+            if (.not. isdefined("data_mask")) then
+                data_mask = shapefile_mask_data(data, province_shp, opt)
+            else
+                data_mask = data_mask+shapefile_mask_data(data, province_shp, opt)
+            end if
+        end if
+    end do
+
+    return data_mask
 
 end

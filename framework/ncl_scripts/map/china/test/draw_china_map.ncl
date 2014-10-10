@@ -13,38 +13,51 @@ begin
     res@provinceThickness = 5.0
     res@isShowCity = False
     res@cityThickness = 5.0
-    res@isShowBeijingCounty = True
+    res@isShowBeijingCounty = False
     res@beijingCountyColor = "red"
     res@beijingCountyThickness = 5.0
     res@isShowSouthChinaSea = False
-    res@isAddMask = True
-    res@isShowRivers = True
+    res@isAddMask = False
+    res@isShowRivers = False
     res@riverColor = "red"
     res@riverThickness = 1.0
     res@boundaryThickness = 2.0
     res@southChinaSeaMapWidth = 0.1
     setup_china_map(res) ; <--- set the resource for China map
 
-    ; --------------------------------------------------------------------------
-    ; draw any data you want here
-    ;data_file = "tas_amip_jja.nc"
-    if (isdefined("data_file")) then
-        ; TODO: modify the following for your need
-        f = addfile(data_file, "r")
 
-        res@cnFillOn        = True
-        res@cnLinesOn       = False
-        res@gsnSpreadColors = True
-        res@lbLabelBarOn    = False
-        res@cnLineLabelsOn  = False
+    num_lon = 1441
+    num_lat = 721
 
-        plot = gsn_csm_contour_map(wks, f->tas(0,:,:), res)
-    else
-        plot = gsn_csm_map(wks, res)
-    end if
+    lon = fspan(0, 360, num_lon)
+    lat = fspan(-90, 90, num_lat)
+    lon@long_name = "longitude"
+    lat@long_name = "latitude"
+    lon@units = "degrees_east"
+    lat@units = "degrees_north"
 
-    ; --------------------------------------------------------------------------
-    ; attach China map on the base plot
+    data = new((/num_lat,num_lon/), float)
+    data!0 = "lat"
+    data&lat = lat
+    data!1 = "lon"
+    data&lon = lon
+
+    data = random_normal(0.0, 1.0, dimsizes(data))
+
+    res@chinaMasks = (/"Hebei","Henan"/)
+    data_mask = get_china_mask(data, res)
+
+    data = mask(data, data_mask, 1)
+
+    res@cnFillOn        = True
+    res@cnLinesOn       = False
+    res@gsnSpreadColors = True
+    res@lbLabelBarOn    = False
+    res@cnLineLabelsOn  = False
+    res@gsnAddCyclic    = False
+
+    plot = gsn_csm_contour_map(wks, data, res)
+
     attach_china_map(wks, plot)
     draw(plot)
 
