@@ -75,35 +75,7 @@ china_map_data_root = "$GEODIAG_ROOT/framework/ncl_scripts/map/china/data"
 procedure plot_shapefile(wks, base_plot, attach_plot, shapefile, res)
 begin
 
-    f = addfile(shapefile, "r")
-
-    segments = f->segments
-    geometry = f->geometry
-    segsDims = dimsizes(f->segments)
-    geomDims = dimsizes(f->geometry)
-
-    geom_segIndex = f@geom_segIndex
-    geom_numSegs  = f@geom_numSegs
-    segs_xyzIndex = f@segs_xyzIndex
-    segs_numPnts  = f@segs_numPnts
-    numFeatures   = geomDims(0)
-
-    lon = f->x
-    lat = f->y
-
-    segNum = 0
-    do i = 0, numFeatures-1
-        start_seg = geometry(i, geom_segIndex)
-        num_seg = geometry(i, geom_numSegs)
-        do seg = start_seg, start_seg+num_seg-1
-            start_point = segments(seg, segs_xyzIndex)
-            end_point = start_point+segments(seg, segs_numPnts)-1
-            base_plot@$unique_string("china_map")$ = \
-                gsn_add_polyline(wks, attach_plot, \
-                lon(start_point:end_point), lat(start_point:end_point), res)
-            segNum = segNum+1
-        end do
-    end do
+    base_plot@$unique_string("china_map")$ = gsn_add_shapefile_polylines(wks, attach_plot, shapefile, res)
 
 end
 
