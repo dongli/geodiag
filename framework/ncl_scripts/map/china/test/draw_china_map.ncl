@@ -9,15 +9,15 @@ begin
     wks = gsn_open_wks("pdf", "china_map")
 
     res = True
-    res@isShowProvince = False
-    res@provinceThickness = 5.0
+    res@resolutionLevel = 2
+    res@isShowProvince = True
+    res@provinceThickness = 1.0
     res@isShowCity = False
     res@cityThickness = 5.0
-    res@isShowBeijingCounty = False
+    res@isShowBeijingCounty = True
     res@beijingCountyColor = "red"
-    res@beijingCountyThickness = 5.0
+    res@beijingCountyThickness = 1.0
     res@isShowSouthChinaSea = False
-    res@isAddMask = False
     res@isShowRivers = False
     res@riverColor = "red"
     res@riverThickness = 1.0
@@ -44,7 +44,7 @@ begin
 
     data = random_normal(0.0, 1.0, dimsizes(data))
 
-    res@chinaMasks = (/"Hebei","Henan"/)
+    res@chinaMasks = (/"China"/)
     data_mask = get_china_mask(data, res)
 
     data = mask(data, data_mask, 1)

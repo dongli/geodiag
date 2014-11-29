@@ -40,7 +40,6 @@
 ;     - beijing6thRingColor: set the color of Beijing 6th ring road
 ;     - beijing6thRingThickness: set the thickness of Beijing 6th ring road
 ;     - isShowSouthChinaSea: show South China Sea or not
-;     - isAddMask: add mask to show only China region or not
 ;     - isShowRivers: show first class rivers or not
 ;     - boundaryColor: set the color of boundary
 ;     - boundaryThickness: set the thickness of boundary
@@ -67,19 +66,63 @@
 ;   2013-12-10 - Add isUseLowResolution option to speed up plotting.
 ;   2013-12-25 - Add city boundary plots.
 ;   2014-01-05 - Change to use NCL mask.
-;   2014-08-29 - Add Beijing quxian boundaries and ring roads.
+;   2014-08-29 - Add Beijing county boundaries and ring roads.
+;   2014-10-10 - Rewrite GEODIAG, so refactor this script. Thanks ... for
+;                adding province name to the province.shp so we can use that
+;                shapefile to mask data with province boundaries.
 ; ------------------------------------------------------------------------------
 
 china_map_data_root = "$GEODIAG_ROOT/framework/ncl_scripts/map/china/data"
 
+config = True ; global internal configuration
+
 procedure plot_shapefile(wks, base_plot, attach_plot, shapefile, res)
+local f, tmp, num_features
 begin
 
-    base_plot@$unique_string("china_map")$ = gsn_add_shapefile_polylines(wks, attach_plot, shapefile, res)
+    f = addfile(shapefile, "r")
+
+    ; The following commented lines produced messed up boundary lines.
+    ; tmp = dimsizes(f->segments)
+    ; num_features = tmp(1)
+
+    ; resolution_level = config@resolutionLevel-1
+    ; if (num_features .le. resolution_level) then
+    ;     resolution_level = num_features-1
+    ; end if
+
+    ; res@gsSegments := f->segments(:,resolution_level)
+    ; base_plot@$unique_string("china_map")$ = gsn_add_polyline(wks, attach_plot, f->x, f->y, res)
+
+    segments = f->segments
+    geometry = f->geometry
+    segsDims = dimsizes(f->segments)
+    geomDims = dimsizes(f->geometry)
+
+    geom_segIndex = f@geom_segIndex
+    geom_numSegs  = f@geom_numSegs
+    segs_xyzIndex = f@segs_xyzIndex
+    segs_numPnts  = f@segs_numPnts
+    numFeatures   = geomDims(0)
+
+    lon = f->x
+    lat = f->y
+
+    segNum = 0
+    do i = 0, numFeatures-1
+        start_seg = geometry(i, geom_segIndex)
+        num_seg = geometry(i, geom_numSegs)
+        do seg = start_seg, start_seg+num_seg-1
+            start_point = segments(seg, segs_xyzIndex)
+            end_point = start_point+segments(seg, segs_numPnts)-1
+            base_plot@$unique_string("china_map")$ = \
+                gsn_add_polyline(wks, attach_plot, \
+                lon(start_point:end_point), lat(start_point:end_point), res)
+            segNum = segNum+1
+        end do
+    end do
 
 end
-
-config = True ; global internal configuration
 
 procedure set_default(res, att_name, default)
 begin
@@ -112,6 +155,7 @@ begin
 
     ; --------------------------------------------------------------------------
     ; transfer configuration for GEODIAG from res to internal config variable
+    transfer_attribute(res, config, "resolutionLevel", 1) ; This is under developement.
     transfer_attribute(res, config, "isShowProvince", False)
     transfer_attribute(res, config, "provinceColor", "blue")
     transfer_attribute(res, config, "provinceThickness", 0.5)
@@ -127,7 +171,6 @@ begin
         transfer_attribute(res, config, "beijingRing"+sprinti("%d", i)+"Thickness", 0.5)
     end do
     transfer_attribute(res, config, "isShowSouthChinaSea", False)
-    transfer_attribute(res, config, "isAddMask", False)
     transfer_attribute(res, config, "isShowRivers", False)
     transfer_attribute(res, config, "riverColor", "black")
     transfer_attribute(res, config, "riverThickness", 0.5)
@@ -146,18 +189,6 @@ begin
     set_default(res, "mpLandFillColor", "white")
     set_default(res, "mpOceanFillColor", "white")
     set_default(res, "mpInlandWaterFillColor", "white")
-
-    if (config@isAddMask) then
-        ; suggested in http://bbs.06climate.com/forum.php?mod=viewthread&tid=11797&extra=page%3D1&page=1
-        res@cnFillDrawOrder = "PreDraw"
-        res@cnLineDrawOrder = "PreDraw"
-        res@mpDataBaseVersion = "MediumRes"
-        res@mpDataSetName = "Earth..4"
-        res@mpAreaMaskingOn = True
-        res@mpMaskAreaSpecifiers = (/"China","Taiwan", \
-              "Disputed area between India and China", \
-              "India:Arunachal Pradesh"/)
-    end if
 
 end
 
@@ -263,37 +294,45 @@ begin
 end
 
 function get_china_mask(data, res)
-local chinaMasks, opt, province_shp, f, province_names, data_mask
+local china_masks, opt, province_shp, f, province_names, data_mask
 begin
 
     if (.not. isatt(res, "chinaMasks")) then
-        system("echo '[Error]: get_china_mask: Attribute chinaMasks is not provided!")
+        system("echo '[Error]: get_china_mask: Attribute chinaMasks is not provided!'")
         exit
     end if
 
     if (isstring(res@chinaMasks))
-        chinaMasks = (/res@chinaMasks/)
+        china_masks = (/res@chinaMasks/)
     else
-        chinaMasks = res@chinaMasks
+        china_masks = res@chinaMasks
     end if
     delete(res@chinaMasks)
-    opt = True
 
-    province_shp = china_map_data_root+"/province.shp"
-    f = addfile(province_shp, "r")
-    province_names = f->NAME
+    opt = True
     opt@shape_var = "NAME"
     opt@return_mask = True
-    do i = 0, dimsizes(chinaMasks)-1
-        if (any(province_names .eq. chinaMasks(i))) then
-            opt@shape_names = chinaMasks(i)
-            if (.not. isdefined("data_mask")) then
-                data_mask = shapefile_mask_data(data, province_shp, opt)
+    if (any(china_masks .eq. "China")) then
+        china_shp = china_map_data_root+"/china.shp"
+        opt@shape_names = "China"
+        data_mask = shapefile_mask_data(data, china_shp, opt)
+    else
+        f = addfile(china_map_data_root+"/province.shp", "r")
+        province_names = f->NAME
+
+        do i = 0, dimsizes(china_masks)-1
+            if (any(province_names .eq. china_masks(i))) then
+                opt@shape_names = china_masks(i)
+                if (.not. isdefined("data_mask")) then
+                    data_mask = shapefile_mask_data(data, province_shp, opt)
+                else
+                    data_mask = data_mask+shapefile_mask_data(data, province_shp, opt)
+                end if
             else
-                data_mask = data_mask+shapefile_mask_data(data, province_shp, opt)
+                system("echo '[Error]: get_china_mask: Mask "+china_masks(i)+" is not valid!'")
             end if
-        end if
-    end do
+        end do
+    end if
 
     return data_mask
 
