@@ -27,18 +27,9 @@
 ;     - isShowBeijingQuxian: show Beijing quxian boundaries or not
 ;     - beijingQuxianColor: set the color of Beijing quxian boundaries
 ;     - beijingQuxianThickness: set the thickness of Beijing quxian boundaries
-;     - isShowBeijing3rdRing: show Beijing 3rd ring road or not
-;     - beijing3rdRingColor: set the color of Beijing 3rd ring road
-;     - beijing3rdRingThickness: set the thickness of Beijing 3rd ring road
-;     - isShowBeijing4thRing: show Beijing 4th ring road or not
-;     - beijing4thRingColor: set the color of Beijing 4th ring road
-;     - beijing4thRingThickness: set the thickness of Beijing 4th ring road
-;     - isShowBeijing5thRing: show Beijing 5th ring road or not
-;     - beijing5thRingColor: set the color of Beijing 5th ring road
-;     - beijing5thRingThickness: set the thickness of Beijing 5th ring road
-;     - isShowBeijing6thRing: show Beijing 6th ring road or not
-;     - beijing6thRingColor: set the color of Beijing 6th ring road
-;     - beijing6thRingThickness: set the thickness of Beijing 6th ring road
+;     - isShowBeijingRing<3,4,5,6>: show Beijing ring road or not
+;     - beijingRing<3,4,5,6>Color: set the color of Beijing ring road
+;     - beijingRing<3,4,5,6>Thickness: set the thickness of Beijing ring road
 ;     - isShowSouthChinaSea: show South China Sea or not
 ;     - isShowRivers: show first class rivers or not
 ;     - boundaryColor: set the color of boundary
@@ -237,6 +228,7 @@ begin
             beijing_ring_shp = china_map_data_root+"/beijing/ring_"+sprinti("%d", i)+".shp"
             res1@gsLineColor = config@$color$
             res1@gsLineThicknessF = config@$thickness$
+            plot_shapefile(wks, base_plot, base_plot, beijing_ring_shp, res1)
         end if
     end do
 
