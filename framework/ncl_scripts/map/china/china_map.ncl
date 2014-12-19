@@ -27,9 +27,9 @@
 ;     - isShowBeijingQuxian: show Beijing quxian boundaries or not
 ;     - beijingQuxianColor: set the color of Beijing quxian boundaries
 ;     - beijingQuxianThickness: set the thickness of Beijing quxian boundaries
-;     - isShowBeijingRing<3,4,5,6>: show Beijing ring road or not
-;     - beijingRing<3,4,5,6>Color: set the color of Beijing ring road
-;     - beijingRing<3,4,5,6>Thickness: set the thickness of Beijing ring road
+;     - isShowBeijingRing<2,3,4,5,6>: show Beijing ring road or not
+;     - beijingRing<2,3,4,5,6>Color: set the color of Beijing ring road
+;     - beijingRing<2,3,4,5,6>Thickness: set the thickness of Beijing ring road
 ;     - isShowSouthChinaSea: show South China Sea or not
 ;     - isShowRivers: show first class rivers or not
 ;     - boundaryColor: set the color of boundary
@@ -156,7 +156,7 @@ begin
     transfer_attribute(res, config, "isShowBeijingCounty", False)
     transfer_attribute(res, config, "beijingCountyColor", "blue")
     transfer_attribute(res, config, "beijingCountyThickness", 0.5)
-    do i = 3, 6
+    do i = 2, 6
         transfer_attribute(res, config, "isShowBeijingRing"+sprinti("%d", i), False)
         transfer_attribute(res, config, "beijingRing"+sprinti("%d", i)+"Color", "blue")
         transfer_attribute(res, config, "beijingRing"+sprinti("%d", i)+"Thickness", 0.5)
@@ -220,7 +220,7 @@ begin
         res1@gsLineThicknessF = config@beijingCountyThickness
         plot_shapefile(wks, base_plot, base_plot, beijing_county_shp, res1)
     end if
-    do i = 3, 6
+    do i = 2, 6
         show = "isShowBeijingRing"+sprinti("%d", i)
         color = "beijingRing"+sprinti("%d", i)+"Color"
         thickness = "beijingRing"+sprinti("%d", i)+"Thickness"
@@ -309,7 +309,8 @@ begin
         opt@shape_names = "China"
         data_mask = shapefile_mask_data(data, china_shp, opt)
     else
-        f = addfile(china_map_data_root+"/province.shp", "r")
+        province_shp = china_map_data_root+"/province.shp"
+        f = addfile(province_shp, "r")
         province_names = f->NAME
 
         do i = 0, dimsizes(china_masks)-1
