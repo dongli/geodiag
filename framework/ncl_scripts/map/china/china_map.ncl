@@ -171,7 +171,6 @@ begin
 
     ; --------------------------------------------------------------------------
     ; set default NCL resources if user does not provide them
-    set_default(res, "gsnMaximize", True)
     set_default(res, "mpMinLatF", 17.0)
     set_default(res, "mpMaxLatF", 55.0)
     set_default(res, "mpMinLonF", 72.0)
