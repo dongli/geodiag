@@ -24,9 +24,9 @@
 ;     - isShowCity: show city boundaries or not
 ;     - cityColor: set the color of city boundaries
 ;     - cityThickness: set the thickness of city boundaries
-;     - isShowBeijingQuxian: show Beijing quxian boundaries or not
-;     - beijingQuxianColor: set the color of Beijing quxian boundaries
-;     - beijingQuxianThickness: set the thickness of Beijing quxian boundaries
+;     - isShowBeijingCounty: show Beijing county boundaries or not
+;     - beijingCountyColor: set the color of Beijing county boundaries
+;     - beijingCountyThickness: set the thickness of Beijing county boundaries
 ;     - isShowBeijingRing<2,3,4,5,6>: show Beijing ring road or not
 ;     - beijingRing<2,3,4,5,6>Color: set the color of Beijing ring road
 ;     - beijingRing<2,3,4,5,6>Thickness: set the thickness of Beijing ring road
