@@ -37,6 +37,8 @@
 ;     - riverColor: set the color of rivers
 ;     - riverThickness: set the thickness of rivers
 ;     - southChinaSeaMapWidth: set the width of the small map
+;     - southChinaSeaBoundaryColor: set the color of the boundary of South China Sea
+;     - southChinaSeaBoundaryThickness: set the thickness of the boundary of South China Sea
 ;
 ; Authors:
 ;
@@ -168,6 +170,8 @@ begin
     transfer_attribute(res, config, "boundaryColor", "black")
     transfer_attribute(res, config, "boundaryThickness", 0.5)
     transfer_attribute(res, config, "southChinaSeaMapWidth", 0.17)
+    transfer_attribute(res, config, "southChinaSeaBoundaryColor", config@boundaryColor)
+    transfer_attribute(res, config, "southChinaSeaBoundaryThickness", config@boundaryThickness)
 
     ; --------------------------------------------------------------------------
     ; set default NCL resources if user does not provide them
@@ -192,10 +196,14 @@ begin
     ;   National Fundamental Geographic Information System
     ;   http://nfgis.nsdi.gov.cn/nfgis/english/default.htm
     china_shp = china_map_data_root+"/china.shp"
+    south_china_sea_shp = china_map_data_root+"/south_china_sea.shp"
     res1                    = True
     res1@gsLineColor        = config@boundaryColor
     res1@gsLineThicknessF   = config@boundaryThickness
     plot_shapefile(wks, base_plot, base_plot, china_shp, res1)
+    res1@gsLineColor        = config@southChinaSeaBoundaryColor
+    res1@gsLineThicknessF   = config@southChinaSeaBoundaryThickness
+    plot_shapefile(wks, base_plot, base_plot, south_china_sea_shp, res1)
 
     ; --------------------------------------------------------------------------
     ; draw province boundaries
@@ -270,9 +278,10 @@ begin
 
         small_map = gsn_csm_map(wks, res3)
 
-        res1@gsLineColor            = config@boundaryColor
-        res1@gsLineThicknessF       = config@boundaryThickness
+        res1@gsLineColor            = config@southChinaSeaBoundaryColor
+        res1@gsLineThicknessF       = config@southChinaSeaBoundaryThickness
         plot_shapefile(wks, base_plot, small_map, china_shp, res1)
+        plot_shapefile(wks, base_plot, small_map, south_china_sea_shp, res1)
 
         res4                    = True
         res4@amParallelPosF     = 0.495
