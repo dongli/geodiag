@@ -23,6 +23,9 @@ begin
     res@riverThickness = 1.0
     res@boundaryThickness = 2.0
     res@southChinaSeaMapWidth = 0.1
+    res@isShowShanghaiCounty = True
+    res@shanghaiCountyThickness = 1.0
+    res@pmTickMarkDisplayMode = "Always"
     setup_china_map(res) ; <--- set the resource for China map
 
 

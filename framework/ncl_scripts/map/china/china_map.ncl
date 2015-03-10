@@ -158,6 +158,9 @@ begin
     transfer_attribute(res, config, "isShowBeijingCounty", False)
     transfer_attribute(res, config, "beijingCountyColor", "blue")
     transfer_attribute(res, config, "beijingCountyThickness", 0.5)
+    transfer_attribute(res, config, "isShowShanghaiCounty", False)
+    transfer_attribute(res, config, "shanghaiCountyColor", "blue")
+    transfer_attribute(res, config, "shanghaiCountyThickness", 0.5)
     do i = 2, 6
         transfer_attribute(res, config, "isShowBeijingRing"+sprinti("%d", i), False)
         transfer_attribute(res, config, "beijingRing"+sprinti("%d", i)+"Color", "blue")
@@ -238,6 +241,15 @@ begin
             plot_shapefile(wks, base_plot, base_plot, beijing_ring_shp, res1)
         end if
     end do
+
+    ; --------------------------------------------------------------------------
+    ; draw Shanghai county boundaries
+    if (config@isShowShanghaiCounty) then
+        shanghai_county_shp = china_map_data_root+"/shanghai/county.shp"
+        res1@gsLineColor = config@shanghaiCountyColor
+        res1@gsLineThicknessF = config@shanghaiCountyThickness
+        plot_shapefile(wks, base_plot, base_plot, shanghai_county_shp, res1)
+    end if
 
     ; --------------------------------------------------------------------------
     ; draw rivers
