@@ -149,6 +149,7 @@ begin
     ; --------------------------------------------------------------------------
     ; transfer configuration for GEODIAG from res to internal config variable
     transfer_attribute(res, config, "resolutionLevel", 1) ; This is under developement.
+    transfer_attribute(res, config, "isShowChinaBoundary", True)
     transfer_attribute(res, config, "isShowProvince", False)
     transfer_attribute(res, config, "provinceColor", "blue")
     transfer_attribute(res, config, "provinceThickness", 0.5)
@@ -194,19 +195,22 @@ local china_shp, province_shp, beijing_county_shp, city_shp, river_shp, \
     show, color, thickness, res1, res2, res3, f, small_map, map
 begin
 
+    res1 = True
+
     ; ------------------------------------------------------------------------
     ; draw china map from shapefile directly which is downloaded from:
     ;   National Fundamental Geographic Information System
     ;   http://nfgis.nsdi.gov.cn/nfgis/english/default.htm
-    china_shp = china_map_data_root+"/china.shp"
-    south_china_sea_shp = china_map_data_root+"/south_china_sea.shp"
-    res1                    = True
-    res1@gsLineColor        = config@boundaryColor
-    res1@gsLineThicknessF   = config@boundaryThickness
-    plot_shapefile(wks, base_plot, base_plot, china_shp, res1)
-    res1@gsLineColor        = config@southChinaSeaBoundaryColor
-    res1@gsLineThicknessF   = config@southChinaSeaBoundaryThickness
-    plot_shapefile(wks, base_plot, base_plot, south_china_sea_shp, res1)
+    if (config@isShowChinaBoundary) then
+        china_shp = china_map_data_root+"/china.shp"
+        south_china_sea_shp = china_map_data_root+"/south_china_sea.shp"
+        res1@gsLineColor      = config@boundaryColor
+        res1@gsLineThicknessF = config@boundaryThickness
+        plot_shapefile(wks, base_plot, base_plot, china_shp, res1)
+        res1@gsLineColor      = config@southChinaSeaBoundaryColor
+        res1@gsLineThicknessF = config@southChinaSeaBoundaryThickness
+        plot_shapefile(wks, base_plot, base_plot, south_china_sea_shp, res1)
+    end if
 
     ; --------------------------------------------------------------------------
     ; draw province boundaries
